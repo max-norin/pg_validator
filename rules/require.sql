@@ -12,12 +12,6 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION "validation".require_m("value" ANYELEMENT) RETURNS TEXT AS
-$$
-BEGIN
-    RETURN "validation".require("value") OPERATOR ("validation".|) 'require'::text;
-END
-$$ LANGUAGE plpgsql;
 
 
 -- TESTS. All is false
