@@ -5,8 +5,8 @@ BEGIN
         RETURN FALSE;
     END IF;
 
-    IF ("validation".string("value")) THEN
-        RETURN length(trim("value")) > 0; -- TODO \t \n
+    IF (pg_typeof("value") IN ('character', 'character varying', 'text')) THEN
+        RETURN length(trim(' \t\n' FROM "value")) > 0;
     END IF;
 
     RETURN TRUE;
@@ -19,11 +19,13 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
--- TODO проверка
-SELECT "validation".require('3454'::varchar),
-       "validation".require('\n   '::varchar),
-       "validation".require(''::varchar),
-       "validation".require(12123::integer),
-       "validation".require(TRUE),
-       "validation".require(NULL::varchar);
+
+-- TESTS. All is false
+SELECT *
+FROM unnest(ARRAY [
+    "validation".require(''::varchar),
+    "validation".require(' \n \t '::varchar),
+    "validation".require(NULL::varchar),
+    "validation".require(NULL::integer)
+    ]);
 

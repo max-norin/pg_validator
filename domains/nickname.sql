@@ -1,0 +1,2 @@
+DROP DOMAIN IF EXISTS "validation".NICKNAME;
+CREATE DOMAIN "validation".NICKNAME AS VARCHAR(100) CHECK ("validation".nickname(VALUE));
