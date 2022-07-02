@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "build": "node build.js",
+        "format": "node format.js",
         "pg_format": "pg_format -i -W 100 -U 2 -p 'RAISE (.+?) USING'"
     },
     "repository": {
