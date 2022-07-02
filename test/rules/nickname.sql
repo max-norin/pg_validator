@@ -1,10 +1,4 @@
 -- all is false
 SELECT *
-FROM unnest(ARRAY [
-    nickname('-account'::varchar),
-    nickname('_account'::varchar),
-    nickname('.account'::varchar),
-    nickname('1account'::varchar),
-    nickname('acco'::varchar)
-    ]);
+FROM unnest(ARRAY[nickname ('-account'::VARCHAR), nickname ('_account'::VARCHAR), nickname ('.account'::VARCHAR), nickname ('1account'::VARCHAR), nickname ('acco'::VARCHAR)]);
 

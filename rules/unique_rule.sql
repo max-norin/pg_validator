@@ -1,6 +1,10 @@
-CREATE FUNCTION unique_rule("schema_table" TEXT, "columns" TEXT[], "record" JSONB, "where" TEXT) RETURNS BOOLEAN AS
-$$
+CREATE FUNCTION unique_rule ("schema_table" TEXT, "columns" TEXT[], "record" JSONB, "where" TEXT)
+    RETURNS BOOLEAN
+    AS $$
 BEGIN
-    RETURN exists_rule("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
+    RETURN exists_rule ("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$
+LANGUAGE plpgsql
+STABLE;
+
