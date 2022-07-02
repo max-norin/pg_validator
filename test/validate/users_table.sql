@@ -1,4 +1,4 @@
-CREATE TABLE public."users"
+CREATE TABLE "users"
 (
     "id"            SERIAL PRIMARY KEY,
     "email"         EMAIL         NOT NULL UNIQUE,
@@ -13,24 +13,30 @@ CREATE TABLE public."users"
     UNIQUE ("id", "age", "nickname"),
     UNIQUE ("id", "nickname"),
     UNIQUE ("id", "rating"),
+    UNIQUE ("id", "age"),
     UNIQUE ("email", "nickname")
 );
 -- два одинаковых индекса без constraint
-CREATE UNIQUE INDEX ON public."users" ("email", "age");
-CREATE UNIQUE INDEX ON public."users" ("email", "age");
+CREATE UNIQUE INDEX ON "users" ("email", "age");
+CREATE UNIQUE INDEX ON "users" ("email", "age");
 
 CREATE TRIGGER "validate"
     BEFORE INSERT OR
         UPDATE
     ON "users"
     FOR EACH ROW
-EXECUTE FUNCTION "validation".trigger_validate();
+EXECUTE FUNCTION trigger_validate();
+
+
 
 
 INSERT INTO public.users (id, email, nickname, password, age, rating, running_speed, date_of_birth, time_of_birth)
-VALUES (DEFAULT, 'email@email.em', 'nickname', 'password', 1, 1, 0.00, '2022-06-01', '00:00');
+VALUES (1, 'email@email.em', 'nickname', 'password', 1, 1, 1.00, '2022-06-01', '00:00');
 
+INSERT INTO public.users (id, email, nickname, password, age, rating, running_speed, date_of_birth, time_of_birth)
+VALUES (2, 'email@email.ema', 'nickname_', 'password', 2, 2, 2.00, '2022-06-01', '00:00');
 
 UPDATE "public"."users"
-SET "email" = 'email@email.em6'
+SET "email" = 'email@email.ema'
 WHERE "id" = 1;
+
