@@ -53,6 +53,7 @@ for (const i in files) {
   content += header + data
 }
 
+const name = process.env.npm_package_name
 const version = process.env.npm_package_version
-const filepath = `./dist/pg_validate--${version}.sql`
+const filepath = `./dist/${name}--${version}.sql`
 fs.writeFileSync(filepath, content, 'utf8')

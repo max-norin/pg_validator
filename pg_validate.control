@@ -1,8 +1,0 @@
-# https://habr.com/ru/post/198332/
-# https://eax.me/postgresql-extensions/
-# https://github.com/pkorobeinikov/postgresql-extension-example
-comment = 'validation'
-default_version = '0.1'
-module_pathname = '$libdir/pg_validate'
-relocatable = false
-schema = 'validation'

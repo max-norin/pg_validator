@@ -1,5 +1,5 @@
 {
-    "name": "pg_validate",
+    "name": "pg_validator",
     "version": "1.0",
     "description": "",
     "type": "module",
@@ -9,7 +9,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/max-norin/pg_validate"
+        "url": "https://github.com/max-norin/pg_validator"
     },
     "author": "Max Norin",
     "license": "ISC",
