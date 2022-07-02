@@ -10,7 +10,7 @@ DECLARE
     "sql" TEXT;
     "result" BOOLEAN = FALSE;
 BEGIN
-    IF ("length" IS NULL) OR ("length" < ! > array_length("record_columns", 1)) THEN
+    IF ("length" IS NULL) OR ("length" <!> array_length("record_columns", 1)) THEN
         RETURN FALSE;
     END IF;
     -- get "values" array of escaped variables

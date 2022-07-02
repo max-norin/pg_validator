@@ -1,10 +1,22 @@
 CREATE TABLE "public"."users" (
-    "id" SERIAL PRIMARY KEY, "email" EMAIL NOT NULL UNIQUE, "nickname" NICKNAME NOT NULL UNIQUE, "password" VARCHAR(255) NOT NULL, "age" UNSIGNED_INT NOT NULL, "rating" FLOAT, "running_speed" DECIMAL(3, 2) NOT NULL, "date_of_birth" DATE NOT NULL, "time_of_birth" TIME NOT NULL, UNIQUE ("id", "email", "nickname"), UNIQUE ("id", "age", "nickname"), UNIQUE ("id", "nickname"), UNIQUE ("id", "rating"), UNIQUE ("id", "age"), UNIQUE ("email", "nickname")
+    "id" SERIAL PRIMARY KEY,
+    "email" EMAIL NOT NULL UNIQUE,
+    "nickname" NICKNAME NOT NULL UNIQUE,
+    "password" VARCHAR(255) NOT NULL,
+    "age" UNSIGNED_INT NOT NULL,
+    "rating" FLOAT,
+    "running_speed" DECIMAL(3, 2) NOT NULL,
+    "date_of_birth" DATE NOT NULL,
+    "time_of_birth" TIME NOT NULL,
+    UNIQUE ("id", "email", "nickname"),
+    UNIQUE ("id", "age", "nickname"),
+    UNIQUE ("id", "nickname"),
+    UNIQUE ("id", "rating"),
+    UNIQUE ("id", "age"),
+    UNIQUE ("email", "nickname")
 );
-
 -- two identical indexes without constraint
 CREATE UNIQUE INDEX ON "public"."users" ("email", "age");
-
 CREATE UNIQUE INDEX ON "public"."users" ("email", "age");
 
 CREATE TRIGGER "validate"

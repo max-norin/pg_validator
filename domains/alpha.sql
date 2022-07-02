@@ -1,3 +1,3 @@
 CREATE DOMAIN ALPHA AS VARCHAR(255)
-CHECK (alpha (VALUE));
+    CHECK (alpha (VALUE));
 

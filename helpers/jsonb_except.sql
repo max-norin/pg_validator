@@ -9,7 +9,8 @@ BEGIN
             FROM jsonb_each_text("a")
             EXCEPT
             SELECT "key", "value"
-            FROM jsonb_each_text("b")) "table" ("key", "value"));
+            FROM jsonb_each_text("b")
+            ) "table" ("key", "value"));
 END;
 $$
 LANGUAGE plpgsql

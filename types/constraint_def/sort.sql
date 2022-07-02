@@ -35,14 +35,11 @@ BEGIN
     WITH "table" AS (
         SELECT "table".*
         FROM unnest("constraints") "table"
-        ORDER BY (
-                CASE WHEN "table"."where" IS NULL THEN
-                    1
-                ELSE
-                    -1
-                END) * "direction"::INTEGER, ("table"."columns" & ? "weighty_columns") * "direction"::INTEGER
+        ORDER BY (CASE WHEN "table"."where" IS NULL THEN 1 ELSE -1 END) * "direction"::INTEGER,
+                 ("table"."columns" &? "weighty_columns") * "direction"::INTEGER
 )
-    SELECT array_agg("table".*) INTO "constraints"
+    SELECT array_agg("table".*)
+    INTO "constraints"
 FROM "table";
     RETURN "constraints";
 END;

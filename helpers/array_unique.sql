@@ -2,8 +2,7 @@ CREATE FUNCTION array_unique ("arr" ANYARRAY)
     RETURNS ANYARRAY
     AS $$
 BEGIN
-    RETURN ARRAY ( SELECT DISTINCT "table".*
-        FROM unnest("arr") "table");
+    RETURN ARRAY ( SELECT DISTINCT "table".* FROM unnest("arr") "table");
 END;
 $$
 LANGUAGE plpgsql

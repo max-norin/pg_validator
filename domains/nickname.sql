@@ -1,3 +1,3 @@
 CREATE DOMAIN NICKNAME AS VARCHAR(100)
-CHECK (nickname (VALUE));
+    CHECK (nickname (VALUE));
 

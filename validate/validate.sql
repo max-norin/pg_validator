@@ -68,7 +68,8 @@ BEGIN
         WHERE "pg_index"."indrelid" = "relid"
             AND "pg_index"."indisunique" = TRUE
 )
-    SELECT array_agg("table"."constraint") INTO "constraints"
+    SELECT array_agg("table"."constraint")
+    INTO "constraints"
     FROM "table"
     WHERE ("table"."constraint")."columns" && "chanced_columns";
     -- constraints group by "type"
@@ -124,9 +125,11 @@ BEGIN
                 END LOOP;
             END IF;
         END LOOP;
+
         IF ("v" != '{}') THEN
             RAISE EXCEPTION USING ERRCODE = 'data_exception', MESSAGE = "v", SCHEMA = "schema", TABLE = "table";
         END IF;
+
         RETURN NEW;
 END
 $$
