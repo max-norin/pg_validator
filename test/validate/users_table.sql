@@ -1,4 +1,4 @@
-CREATE TABLE "users"
+CREATE TABLE "public"."users"
 (
     "id"            SERIAL PRIMARY KEY,
     "email"         EMAIL         NOT NULL UNIQUE,
@@ -17,23 +17,23 @@ CREATE TABLE "users"
     UNIQUE ("email", "nickname")
 );
 -- two identical indexes without constraint
-CREATE UNIQUE INDEX ON "users" ("email", "age");
-CREATE UNIQUE INDEX ON "users" ("email", "age");
+CREATE UNIQUE INDEX ON "public"."users" ("email", "age");
+CREATE UNIQUE INDEX ON "public"."users" ("email", "age");
 
 CREATE TRIGGER "validate"
     BEFORE INSERT OR
         UPDATE
-    ON "users"
+    ON "public"."users"
     FOR EACH ROW
 EXECUTE FUNCTION trigger_validate();
 
 
 
 
-INSERT INTO public.users (id, email, nickname, password, age, rating, running_speed, date_of_birth, time_of_birth)
+INSERT INTO "public"."users" ("id", "email", "nickname", "password", "age", "rating", "running_speed", "date_of_birth", "time_of_birth")
 VALUES (1, 'email@email.em', 'nickname', 'password', 1, 1, 1.00, '2022-06-01', '00:00');
 
-INSERT INTO public.users (id, email, nickname, password, age, rating, running_speed, date_of_birth, time_of_birth)
+INSERT INTO "public"."users" ("id", "email", "nickname", "password", "age", "rating", "running_speed", "date_of_birth", "time_of_birth")
 VALUES (2, 'email@email.ema', 'nickname_', 'password', 2, 2, 2.00, '2022-06-01', '00:00');
 
 UPDATE "public"."users"
