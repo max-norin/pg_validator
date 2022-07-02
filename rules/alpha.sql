@@ -1,6 +1,7 @@
-CREATE OR REPLACE FUNCTION "validation".alpha("value" ANYELEMENT) RETURNS BOOLEAN AS
+CREATE FUNCTION "validation".alpha("value" ANYELEMENT) RETURNS BOOLEAN AS
 $$
 BEGIN
-    RETURN ("value" IS NULL) OR ("value" ~* '^[a-zA-Z]*$');
+    RETURN ("value" ~* '^[a-zA-Z]*$');
 END
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql IMMUTABLE
+                    RETURNS NULL ON NULL INPUT;

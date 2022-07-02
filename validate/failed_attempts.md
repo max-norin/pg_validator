@@ -31,7 +31,7 @@ FROM 'users':: regclass;
 Ниже пример с `REGCLASS`
 
 ```postgresql
-CREATE OR REPLACE FUNCTION "validation".exec0("table" REGCLASS) RETURNS SETOF RECORD AS
+CREATE FUNCTION "validation".exec0("table" REGCLASS) RETURNS SETOF RECORD AS
 $$
 BEGIN
     RETURN QUERY EXECUTE format('SELECT * FROM %I WHERE TRUE;', "table");
@@ -44,7 +44,7 @@ FROM "validation".exec0('users':: REGCLASS) as "t"("id" INTEGER, "email" VARCHAR
 Ниже пример с `REGPROCEDURE`
 
 ```postgresql
-CREATE OR REPLACE FUNCTION "validation".exec1("func" REGPROCEDURE, "text" TEXT) RETURNS SETOF RECORD AS
+CREATE FUNCTION "validation".exec1("func" REGPROCEDURE, "text" TEXT) RETURNS SETOF RECORD AS
 $$
 BEGIN
     RETURN QUERY EXECUTE format(
@@ -114,7 +114,7 @@ CREATE TYPE "validation".validation AS
 Сразу в триггере формируем сообщения об ошибках, если имеются. Просто, но выглядит громоздко.
 
 ```postgresql
-CREATE OR REPLACE FUNCTION trigger_users_validate() RETURNS TRIGGER AS
+CREATE FUNCTION trigger_users_validate() RETURNS TRIGGER AS
 $$
 DECLARE
     v    JSONB = '{}'; -- переменная для хранения сообщений
@@ -185,7 +185,7 @@ SELECT pg_get_function_result('jsonb_object_agg_finalfn'::regproc);
 Но из-за использования в них типа internal пришлось писать свои.
 
 ```postgresql
-CREATE OR REPLACE FUNCTION "validation".col_msgses_err_agg_transfn("v" jsonb, "col" text, "msgs" text[]) RETURNS jsonb AS
+CREATE FUNCTION "validation".col_msgses_err_agg_transfn("v" jsonb, "col" text, "msgs" text[]) RETURNS jsonb AS
 $$
 BEGIN
     "msgs" = "validation".array_remove("msgs", NULL);
@@ -197,7 +197,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION "validation".col_msgses_err_agg_finalfn("v" jsonb) RETURNS void AS
+CREATE FUNCTION "validation".col_msgses_err_agg_finalfn("v" jsonb) RETURNS void AS
 $$
 BEGIN
     IF ("v" != '{}') THEN

@@ -1,25 +1,13 @@
-CREATE OR REPLACE FUNCTION "validation".require("value" ANYELEMENT) RETURNS BOOLEAN AS
+CREATE FUNCTION "validation".require("value" ANYELEMENT) RETURNS BOOLEAN AS
 $$
 BEGIN
-    IF ("value" IS NULL) THEN
-        RETURN FALSE;
-    END IF;
-
-    IF (pg_typeof("value") IN ('character', 'character varying', 'text')) THEN
-        RETURN length(trim(' \t\n' FROM "value")) > 0;
-    END IF;
-
-    RETURN TRUE;
+    RETURN ("value" IS NOT NULL);
 END
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
-
--- TESTS. All is false
-SELECT *
-FROM unnest(ARRAY [
-    "validation".require(''::varchar),
-    "validation".require(' \n \t '::varchar),
-    "validation".require(NULL::varchar),
-    "validation".require(NULL::integer)
-    ]);
-
+CREATE FUNCTION "validation".require("value" TEXT) RETURNS BOOLEAN AS
+$$
+BEGIN
+    RETURN ("value" IS NOT NULL) AND (length(trim(' \t\n' FROM "value")) > 0);
+END
+$$ LANGUAGE plpgsql IMMUTABLE;

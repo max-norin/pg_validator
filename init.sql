@@ -1,7 +1,3 @@
-/**
-  Initial database setup.
- */
-
 CREATE ROLE "validation" LOGIN;
 CREATE SCHEMA "validation" AUTHORIZATION "validation";
 
