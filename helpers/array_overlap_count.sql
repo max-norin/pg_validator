@@ -1,9 +1,9 @@
 CREATE FUNCTION array_overlap_count("a" ANYARRAY, "b" ANYARRAY) RETURNS INT AS
 $$
 DECLARE
-    "length" INT = array_length("a", 1);
-    "index"  INT;
-    "result" INT = 0;
+    "length" CONSTANT INT = array_length("a", 1);
+    "index"           INT;
+    "result"          INT = 0;
 BEGIN
     "index" = 1;
     WHILE "index" <= "length"

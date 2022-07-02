@@ -1,8 +1,8 @@
 CREATE FUNCTION set_eq("a" SET, "b" SET) RETURNS BOOLEAN AS
 $$
 DECLARE
-    "length" INT = array_length("a", 1);
-    "index"  INT;
+    "length" CONSTANT INT = array_length("a", 1);
+    "index"           INT;
 BEGIN
     IF ("length" != array_length("b", 1)) THEN
         RETURN FALSE;
@@ -11,6 +11,7 @@ BEGIN
     "index" = 1;
     WHILE "index" <= "length"
         LOOP
+            -- = because SET element cannot be NULL
             IF NOT ("a"["index"] = ANY ("b")) THEN
                 RETURN FALSE;
             END IF;
@@ -23,8 +24,6 @@ $$ LANGUAGE plpgsql IMMUTABLE
                     RETURNS NULL ON NULL INPUT;
 COMMENT ON FUNCTION set_eq(SET, SET) IS 'comparison of sets for equality';
 
-
-
 CREATE OPERATOR = (
     LEFTARG = SET,
     RIGHTARG = SET,
@@ -33,6 +32,8 @@ CREATE OPERATOR = (
     FUNCTION = set_eq
     );
 COMMENT ON OPERATOR =(SET, SET) IS 'comparison of sets for equality';
+
+
 
 CREATE FUNCTION set_neq("a" SET, "b" SET) RETURNS BOOLEAN AS
 $$

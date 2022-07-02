@@ -8,7 +8,7 @@ DECLARE
     "f_constraints"            CONSTRAINT_DEF[] = '{}';
     "u_constraints"            CONSTRAINT_DEF[] = '{}';
     "record"          CONSTANT JSONB            = to_jsonb(NEW);
-    "chanced_record"  CONSTANT JSONB            = jsonb_except("record", to_jsonb(OLD));
+    "chanced_record"  CONSTANT JSONB            = "record" - to_jsonb(OLD);
     "chanced_columns" CONSTANT SET              = ARRAY(SELECT jsonb_object_keys("chanced_record"));
     "schema"          CONSTANT TEXT             = TG_TABLE_SCHEMA;
     "table"           CONSTANT TEXT             = TG_TABLE_NAME;
@@ -83,7 +83,7 @@ BEGIN
             RAISE DEBUG USING MESSAGE = (concat('keys: ', "constraint"."keys"));
             RAISE DEBUG USING MESSAGE = (concat('f_cc: ', "f_confirmed_constraints"));
 
-            IF ("v" ?| "constraint"."columns") OR ("constraint" OPERATOR (<@) ANY ("f_confirmed_constraints")) THEN
+            IF ("v" ?| "constraint"."columns") OR ("constraint" <@ ANY ("f_confirmed_constraints")) THEN
                 CONTINUE ;
             END IF;
             "res" = exists_rule("constraint"."fk_table", "constraint"."fk_columns", "record", "constraint"."columns", "constraint"."fk_mode", NULL::TEXT);
@@ -106,7 +106,7 @@ BEGIN
             RAISE DEBUG USING MESSAGE = (concat('keys: ', "constraint"."keys"));
             RAISE DEBUG USING MESSAGE = (concat('u_cc: ', "u_confirmed_constraints"));
 
-            IF ("v" ?| "constraint"."columns") OR ("constraint" OPERATOR (@>) ANY ("u_confirmed_constraints")) THEN
+            IF ("v" ?| "constraint"."columns") OR ("constraint" @> ANY ("u_confirmed_constraints")) THEN
                 CONTINUE ;
             END IF;
             "res" = unique_rule("table", "constraint"."columns", "record", "constraint"."where");

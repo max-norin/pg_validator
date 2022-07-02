@@ -1,7 +1,7 @@
 CREATE FUNCTION constraint_def_eq("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF) RETURNS BOOLEAN AS
 $$
 BEGIN
-    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" OPERATOR (=) "b"."keys");
+    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" = "b"."keys");
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 

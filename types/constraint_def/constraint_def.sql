@@ -1,6 +1,3 @@
-SELECT current_catalog;
-
-
 CREATE TYPE CONSTRAINT_DEF AS
 (
     "content"    TEXT,

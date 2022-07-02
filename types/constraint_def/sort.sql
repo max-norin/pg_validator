@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION constraint_defs_sort("constraints" CONSTRAINT_DEF[], "direction" SORT_DIRECTION) RETURNS CONSTRAINT_DEF[] AS
+CREATE FUNCTION constraint_defs_sort("constraints" CONSTRAINT_DEF[], "direction" SORT_DIRECTION) RETURNS CONSTRAINT_DEF[] AS
 $$
 DECLARE
     "all_columns"     TEXT[] = '{}';
     "weighty_columns" TEXT[] = '{}';
     "index"           INT;
-    "length"          INT    = array_length("constraints", 1);
+    "length" CONSTANT INT    = array_length("constraints", 1);
     "column"          TEXT;
 BEGIN
     IF "length" IS NULL THEN
@@ -35,7 +35,7 @@ BEGIN
     WITH "table" AS (SELECT "table".*
                      FROM unnest("constraints") "table"
                      ORDER BY (CASE WHEN "table"."where" IS NULL THEN 1 ELSE -1 END) * "direction"::INTEGER,
-                              ("table"."columns" OPERATOR ( &?) "weighty_columns") * "direction"::INTEGER)
+                              ("table"."columns" &? "weighty_columns") * "direction"::INTEGER)
     SELECT array_agg("table".*)
     INTO "constraints"
     FROM "table";

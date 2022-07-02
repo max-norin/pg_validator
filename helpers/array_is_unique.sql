@@ -1,8 +1,8 @@
 CREATE FUNCTION array_is_unique("arr" ANYARRAY) RETURNS BOOLEAN AS
 $$
 DECLARE
-    "length" INT = array_length("arr", 1);
-    "index"  INT;
+    "length" CONSTANT INT = array_length("arr", 1);
+    "index"           INT;
 BEGIN
     "index" = 1;
     WHILE "index" < "length"
