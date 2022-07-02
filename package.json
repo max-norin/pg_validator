@@ -1,19 +1,18 @@
 {
     "name": "pg_validate",
-    "version": "0.1",
+    "version": "1.0",
     "description": "",
     "type": "module",
     "scripts": {
-        "build": "node build.js"
+        "build": "node build.js",
+        "pg_format": "pg_format test.sql -i -W 100 -U 2 -p 'RAISE (.+?) USING'"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/max-norin"
+        "url": "https://github.com/max-norin/pg_validate"
     },
     "author": "Max Norin",
     "license": "ISC",
-    "dependencies": {
-    },
-    "devDependencies": {
-    }
+    "dependencies": {},
+    "devDependencies": {}
 }
