@@ -21,12 +21,10 @@ CREATE UNIQUE INDEX ON "public"."users" ("email", "age");
 CREATE UNIQUE INDEX ON "public"."users" ("email", "age");
 
 CREATE TRIGGER "validate"
-    BEFORE INSERT OR
-        UPDATE
+    BEFORE INSERT OR UPDATE
     ON "public"."users"
     FOR EACH ROW
 EXECUTE FUNCTION trigger_validate();
-
 
 
 

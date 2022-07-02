@@ -32,8 +32,7 @@ CREATE UNIQUE INDEX ON "public"."posts" ("title", "user_id") WHERE "deleted_at" 
 CREATE UNIQUE INDEX ON "public"."posts" ("title", "user_id") WHERE "public"."posts"."deleted_at" IS NULL;
 
 CREATE TRIGGER "validate"
-    BEFORE INSERT OR
-        UPDATE
+    BEFORE INSERT OR UPDATE
     ON "public"."posts"
     FOR EACH ROW
 EXECUTE FUNCTION trigger_validate();
