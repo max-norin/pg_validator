@@ -1,58 +1,123 @@
-Расширение позволяет производить проверку вставляемых данных и выдавать ответ об ошибках в виде json. Проверка уникальных индексов, уникального ограничения, внешних ключей. Тип данных не проверяется.
+# pg_validator
 
-# Использование
-Чтобы осуществить проверку нужно к таблице добавить триггер из расширения.
+> The extension allows you to check the data before COMMIT and sends an error response in the form
+> of json. The data is checked for unique indexes, unique constraints, foreign keys. The data type
+> is not checked.
 
-# Домены
+[README in Russian](./README.ru.md)
 
-Расширение приведённых список часто используемых доменов и проверок на эти домены в виде отдельных функций. Дополнительные типы данных для помощи в валидации данных
+## Getting Started
 
-# FAQ
+### Install
 
-## Почему тип данных не проверяется?
-Базовые типы данных такие как дата, время, дата и время, ip адрес - проверяются перед запуском триггеров и проверить их не удаётся. Конечно можно сделать на каждую таблицу функцию для вставки и обновления данных, а в саму таблицу запретить редактирования используя ... Однако это сильная морока для разработков и лишние энергозатраты со стороны сервера базы данных. Поэтому я рекомендую использовать домены
+Download the files from [dist](./dist) to your `extension` folder PostgreSQL and run the following
+command.
 
-## Как и откуда берутся проверки?
+```postgresql
+CREATE EXTENSION "pg_validator"
+    SCHEMA "validator"
+    VERSION '1.0';
+```
 
-Я считаю слово писать для каждого таблицы отдельных триггер с проверкой является морокой для разработчика поэтому при создании базы данных важно указать все нужные ограничения. Триггер расширение сможет извлечь из информационных таблиц данные ООО всех индексах и ограничениях и проверить правильность введённых данных. Если индексы или ограничения перекрывают друг друга или проверка не имеет смысла то проверка производится не будет. Я подробно испанский вы можете самостоятельно познакомиться с триггером.
-Чтобы проверить работу можно воспользоваться файлами для тестов и поставить отображение сообщений об отладке или информации запросов.
+### Usage
 
+To perform the check, you need to add `trigger_validate()` trigger from the extension to the table.
 
-# Что в файлах
+```postgresql
+CREATE TRIGGER "validate"
+    BEFORE INSERT OR UPDATE
+    ON "public"."users"
+    FOR EACH ROW
+EXECUTE FUNCTION trigger_validate();
+```
 
-## `init.sql `
+## Domains
 
-- создается пользователь validation
-  / [doc](https://www.postgresql.org/docs/current/sql-createrole.html)
-- создается схема validation, принадлежащая вышеуказанному пользователю
-  / [doc](https://www.postgresql.org/docs/current/sql-createschema.html)
-- добавляется в search_path пользователя validation схема validation
-  / [doc](https://www.postgresql.org/docs/current/ddl-schemas.html)
+The extension has popular domains and checks them as separate features.
 
-## `helpers.sql`
+- [alpha](./domains/alpha.sql)
+- [email](./domains/email.sql)
+- [nickname](./domains/nickname.sql)
+- [unsigned_bigint](./domains/unsigned_bigint.sql)
+- [unsigned_int](./domains/unsigned_int.sql)
+- [url](./domains/url.sql)
 
-- создается функция для работы с правилами - если результат отрицательный, то возвращается сообщение
-- создается оператор для краткой записи функции указанной выше
+```postgresql
+-- Example
+CREATE TABLE "users"
+(
+    "id"       SERIAL PRIMARY KEY,
+    "email"    EMAIL        NOT NULL UNIQUE,
+    "nickname" NICKNAME     NOT NULL UNIQUE,
+    "site"     URL          NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
+    "age"      UNSIGNED_INT NOT NULL
+);
+```
 
-## `domains/*.sql`
+## FAQ
 
-Популярные домены:
+### Why is the data type not checked?
 
-- alpha
-- numeric
-- email
-- url
-- nickname
+Basic data types such as date, time, datetime, IP address are validated before triggers run and
+cannot be validated. Another option is to make a function to insert and update data in each table
+and prevent the table from being edited directly. However, this is a time-consuming task for
+developers and unnecessary power consumption on the part of the database server. Therefore, I
+recommend using domains.
 
-## `test/*.sql`
+### Where do checks come from?
 
-Тестовые файлы
+`trigger_validate()` trigger retrieves all constraints and indexes from info tables. If constraint
+or index checks overlap, or if a similar check has already been performed, then no check will be
+made. You can read more about this for yourself [here](./validate/validate.sql).
 
-# Полезное
+You can use the test files [here](./test/validate) to see if it works. To view all messages, you can
+use the `client_min_messages` setting.
+
+```postgresql
+-- Setting the message output level
+SELECT pg_catalog.set_config('client_min_messages'::TEXT, 'WARNING'::TEXT, FALSE);
+SELECT pg_catalog.set_config('client_min_messages'::TEXT, 'NOTICE'::TEXT, FALSE);
+SELECT pg_catalog.set_config('client_min_messages'::TEXT, 'DEBUG'::TEXT, FALSE);
+SELECT pg_catalog.current_setting('client_min_messages'::TEXT);
+```
+
+## Files
+
+- `helpers/*.sql` - helper functions
+    - [array_is_unique](./helpers/array_is_unique.sql)
+    - [array_overlap_count](./helpers/array_overlap_count.sql)
+    - [array_unique](./helpers/array_unique.sql)
+    - [is_distinct_from](./helpers/is_distinct_from.sql)
+    - [jsonb_array_append](./helpers/jsonb_array_append.sql)
+    - [jsonb_except](./helpers/jsonb_except.sql)
+    - [to_columns](./helpers/to_columns.sql)
+- `types/*.sql` - helper types
+    - [constraint_def](./types/constraint_def) - constraint definition
+    - [set](./types/set) - mathematical set
+    - [constraint_type](./types/constraint_type.sql) - `emun('f','u')`
+    - [fk_mode](./types/fk_mode.sql) - `emun('full','simple')`
+    - [sort_direction](./types/sort_direction.sql) - `emun('ASC','DESC')`
+- `rules/*.sql` - popular rules
+    - [alpha](./rules/alpha.sql)
+    - [email](./rules/email.sql)
+    - [exists](./rules/exists_rule.sql)
+    - [nickname](./rules/nickname.sql)
+    - [require](./rules/require_rule.sql)
+    - [unique](./rules/unique_rule.sql)
+    - [url](./rules/url.sql)
+- `domains/*.sql` - popular domains
+    - [alpha](./domains/alpha.sql)
+    - [email](./domains/email.sql)
+    - [nickname](./domains/nickname.sql)
+    - [unsigned_bigint](./domains/unsigned_bigint.sql)
+    - [unsigned_int](./domains/unsigned_int.sql)
+    - [url](./domains/url.sql)
+- [`validate/validate.sql`](./validate/validate.sql) - validate trigger
+- [`test/*.sql`](./test) - test files
+
+## Useful links
 
 - [Pseudotypes](https://www.postgresql.org/docs/current/datatype-pseudo.html)
-- internal использовать можно только в функциях на C
 - [Functions with Variable Numbers of Arguments](https://www.postgresql.org/docs/current/xfunc-sql.html#XFUNC-SQL-VARIADIC-FUNCTIONS)
 - [Object Identifier Types](https://www.postgresql.org/docs/current/datatype-oid.html#DATATYPE-OID-TABLE)
-
-
