@@ -1,4 +1,4 @@
-CREATE DOMAIN "validation".SET AS TEXT[]
-    CONSTRAINT "null_check" CHECK ( NOT (NULL::TEXT OPERATOR ("validation".=!=) ANY (VALUE)) )
-    CONSTRAINT "unique_check" CHECK ( "validation".array_is_unique(VALUE) );
-COMMENT ON DOMAIN "validation".SET IS 'mathematical set';
+CREATE DOMAIN SET AS TEXT[]
+    CONSTRAINT "null_check" CHECK ( NOT (NULL::TEXT OPERATOR (=!=) ANY (VALUE)) )
+    CONSTRAINT "unique_check" CHECK ( array_is_unique(VALUE) );
+COMMENT ON DOMAIN SET IS 'mathematical set';

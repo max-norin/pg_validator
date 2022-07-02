@@ -1,4 +1,4 @@
-CREATE FUNCTION "validation".nickname("value" ANYELEMENT) RETURNS BOOLEAN AS
+CREATE FUNCTION nickname("value" ANYELEMENT) RETURNS BOOLEAN AS
 $$
 BEGIN
     RETURN ("value" ~ '^[a-z][a-z0-9_\\.]{4,}$');

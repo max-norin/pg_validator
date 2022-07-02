@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION "validation".exists("table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" "validation".FK_MODE = 'full',
+CREATE OR REPLACE FUNCTION exists_rule("table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" FK_MODE = 'full',
                                                "where" TEXT = NULL) RETURNS BOOLEAN AS
 $$
 DECLARE

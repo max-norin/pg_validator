@@ -31,20 +31,20 @@ FROM 'users':: regclass;
 Ниже пример с `REGCLASS`
 
 ```postgresql
-CREATE FUNCTION "validation".exec0("table" REGCLASS) RETURNS SETOF RECORD AS
+CREATE FUNCTION exec0("table" REGCLASS) RETURNS SETOF RECORD AS
 $$
 BEGIN
     RETURN QUERY EXECUTE format('SELECT * FROM %I WHERE TRUE;', "table");
 END
 $$ LANGUAGE plpgsql;
 SELECT *
-FROM "validation".exec0('users':: REGCLASS) as "t"("id" INTEGER, "email" VARCHAR(255), "nickname" VARCHAR(100), "password" VARCHAR(255));
+FROM exec0('users':: REGCLASS) as "t"("id" INTEGER, "email" VARCHAR(255), "nickname" VARCHAR(100), "password" VARCHAR(255));
 ```
 
 Ниже пример с `REGPROCEDURE`
 
 ```postgresql
-CREATE FUNCTION "validation".exec1("func" REGPROCEDURE, "text" TEXT) RETURNS SETOF RECORD AS
+CREATE FUNCTION exec1("func" REGPROCEDURE, "text" TEXT) RETURNS SETOF RECORD AS
 $$
 BEGIN
     RETURN QUERY EXECUTE format(
@@ -53,7 +53,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 SELECT *
-FROM "validation".exec1('length(TEXT)':: REGPROCEDURE, 'Hello'::TEXT) as "t"("result" INTEGER);
+FROM exec1('length(TEXT)':: REGPROCEDURE, 'Hello'::TEXT) as "t"("result" INTEGER);
 ```
 
 # Варианты с внешним хранением функций
@@ -68,7 +68,7 @@ FROM "validation".exec1('length(TEXT)':: REGPROCEDURE, 'Hello'::TEXT) as "t"("re
 в этой таблице функции.
 
 ```postgresql
-CREATE TYPE "validation".validation AS
+CREATE TYPE validation AS
 (
     "table_name"  information_schema.sql_identifier, -- таблица
     "column_name" information_schema.sql_identifier, -- колонка
@@ -93,7 +93,7 @@ WHERE table_name = 'users'
 осушествлялась бы триггере.
 
 ```postgresql
-CREATE TYPE "validation".validation AS
+CREATE TYPE validation AS
 (
     "model"    ANYELEMENT,   -- значение
     "function" REGPROCEDURE, -- функция проверки принимающая "model" и "params"
@@ -161,8 +161,8 @@ CREATE EXTENSION IF NOT EXISTS tablefunc;
 Идея была иметь таблицу с сообщениями, где название колонок это наименование заполняемых полей.
 
 ```postgresql
-SELECT ARRAY ["validation".to_require(''::varchar(255))]        AS email,
-       ARRAY ["validation".to_require('7@j.com'::varchar(255))] AS password;
+SELECT ARRAY [to_require(''::varchar(255))]        AS email,
+       ARRAY [to_require('7@j.com'::varchar(255))] AS password;
 ```
 
 Но потом опять плохие новости, что crosstab (функция транспонирования) приниматет в качестве
@@ -185,10 +185,10 @@ SELECT pg_get_function_result('jsonb_object_agg_finalfn'::regproc);
 Но из-за использования в них типа internal пришлось писать свои.
 
 ```postgresql
-CREATE FUNCTION "validation".col_msgses_err_agg_transfn("v" jsonb, "col" text, "msgs" text[]) RETURNS jsonb AS
+CREATE FUNCTION col_msgses_err_agg_transfn("v" jsonb, "col" text, "msgs" text[]) RETURNS jsonb AS
 $$
 BEGIN
-    "msgs" = "validation".array_remove("msgs", NULL);
+    "msgs" = array_remove("msgs", NULL);
     IF array_length("msgs", 1) > 0 THEN
         RETURN jsonb_set("v", ARRAY ["col"], to_jsonb("msgs"));
     END IF;
@@ -197,7 +197,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION "validation".col_msgses_err_agg_finalfn("v" jsonb) RETURNS void AS
+CREATE FUNCTION col_msgses_err_agg_finalfn("v" jsonb) RETURNS void AS
 $$
 BEGIN
     IF ("v" != '{}') THEN
@@ -206,11 +206,11 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE AGGREGATE "validation".col_msgses_err_agg(text, text[]) (
-    SFUNC = "validation".col_msgses_err_agg_transfn,
+CREATE AGGREGATE col_msgses_err_agg(text, text[]) (
+    SFUNC = col_msgses_err_agg_transfn,
     STYPE = jsonb,
     INITCOND = '{}',
-    FINALFUNC = "validation".col_msgses_err_agg_finalfn
+    FINALFUNC = col_msgses_err_agg_finalfn
     );
 ```
 

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION "validation".constraints_sort("constraints" "validation".CONSTRAINT[], "direction" "validation".SORT_DIRECTION) RETURNS "validation".CONSTRAINT[] AS
+CREATE OR REPLACE FUNCTION constraint_defs_sort("constraints" CONSTRAINT_DEF[], "direction" SORT_DIRECTION) RETURNS CONSTRAINT_DEF[] AS
 $$
 DECLARE
     "all_columns"     TEXT[] = '{}';
@@ -35,7 +35,7 @@ BEGIN
     WITH "table" AS (SELECT "table".*
                      FROM unnest("constraints") "table"
                      ORDER BY (CASE WHEN "table"."where" IS NULL THEN 1 ELSE -1 END) * "direction"::INTEGER,
-                              ("table"."columns" OPERATOR ( "validation".&?) "weighty_columns") * "direction"::INTEGER)
+                              ("table"."columns" OPERATOR ( &?) "weighty_columns") * "direction"::INTEGER)
     SELECT array_agg("table".*)
     INTO "constraints"
     FROM "table";
@@ -43,4 +43,4 @@ BEGIN
     RETURN "constraints";
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
-COMMENT ON FUNCTION "validation".constraints_sort("validation".CONSTRAINT[], "validation".SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';
+COMMENT ON FUNCTION constraint_defs_sort(CONSTRAINT_DEF[], SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';

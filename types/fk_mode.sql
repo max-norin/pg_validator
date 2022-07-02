@@ -1,2 +1,2 @@
-CREATE TYPE "validation".FK_MODE AS ENUM ('full', 'simple');
-COMMENT ON DOMAIN "validation".SET IS 'foreign key set';
+CREATE TYPE FK_MODE AS ENUM ('full', 'simple');
+COMMENT ON TYPE FK_MODE IS 'foreign key mode';

@@ -1,4 +1,4 @@
-CREATE FUNCTION "validation".array_is_unique("arr" ANYARRAY) RETURNS BOOLEAN AS
+CREATE FUNCTION array_is_unique("arr" ANYARRAY) RETURNS BOOLEAN AS
 $$
 DECLARE
     "length" INT = array_length("arr", 1);
@@ -17,4 +17,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE
                     RETURNS NULL ON NULL INPUT;
-COMMENT ON FUNCTION "validation".array_is_unique(ANYARRAY) IS 'checks array for duplicate elements';
+COMMENT ON FUNCTION array_is_unique(ANYARRAY) IS 'checks array for duplicate elements';

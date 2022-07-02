@@ -1,4 +1,4 @@
-CREATE FUNCTION "validation".set_eq("a" "validation".SET, "b" "validation".SET) RETURNS BOOLEAN AS
+CREATE FUNCTION set_eq("a" SET, "b" SET) RETURNS BOOLEAN AS
 $$
 DECLARE
     "length" INT = array_length("a", 1);
@@ -21,33 +21,33 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE
                     RETURNS NULL ON NULL INPUT;
-COMMENT ON FUNCTION "validation".set_eq("validation".SET, "validation".SET) IS 'comparison of sets for equality';
+COMMENT ON FUNCTION set_eq(SET, SET) IS 'comparison of sets for equality';
 
 
 
-CREATE OPERATOR "validation".= (
-    LEFTARG = "validation".SET,
-    RIGHTARG = "validation".SET,
+CREATE OPERATOR = (
+    LEFTARG = SET,
+    RIGHTARG = SET,
     NEGATOR = !=,
     RESTRICT = eqsel,
-    FUNCTION = "validation".set_eq
+    FUNCTION = set_eq
     );
-COMMENT ON OPERATOR "validation".=("validation".SET, "validation".SET) IS 'comparison of sets for equality';
+COMMENT ON OPERATOR =(SET, SET) IS 'comparison of sets for equality';
 
-CREATE FUNCTION "validation".set_neq("a" "validation".SET, "b" "validation".SET) RETURNS BOOLEAN AS
+CREATE FUNCTION set_neq("a" SET, "b" SET) RETURNS BOOLEAN AS
 $$
 BEGIN
-    RETURN NOT "validation".set_eq("a", "b");
+    RETURN NOT set_eq("a", "b");
 END;
 $$ LANGUAGE plpgsql IMMUTABLE
                     RETURNS NULL ON NULL INPUT;
-COMMENT ON FUNCTION "validation".set_eq("validation".SET, "validation".SET) IS 'comparison of sets for not equality';
+COMMENT ON FUNCTION set_eq(SET, SET) IS 'comparison of sets for not equality';
 
-CREATE OPERATOR "validation".!= (
-    LEFTARG = "validation".SET,
-    RIGHTARG = "validation".SET,
+CREATE OPERATOR != (
+    LEFTARG = SET,
+    RIGHTARG = SET,
     NEGATOR = =,
     RESTRICT = neqsel,
-    FUNCTION = "validation".set_neq
+    FUNCTION = set_neq
     );
-COMMENT ON OPERATOR "validation".!=("validation".SET, "validation".SET) IS 'comparison of sets for not equality';
+COMMENT ON OPERATOR !=(SET, SET) IS 'comparison of sets for not equality';

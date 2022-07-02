@@ -1,4 +1,4 @@
-CREATE FUNCTION "validation".array_overlap_count("a" ANYARRAY, "b" ANYARRAY) RETURNS INT AS
+CREATE FUNCTION array_overlap_count("a" ANYARRAY, "b" ANYARRAY) RETURNS INT AS
 $$
 DECLARE
     "length" INT = array_length("a", 1);
@@ -18,11 +18,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE
                     RETURNS NULL ON NULL INPUT;
-COMMENT ON FUNCTION "validation".array_overlap_count(ANYARRAY, ANYARRAY) IS 'overlap count';
+COMMENT ON FUNCTION array_overlap_count(ANYARRAY, ANYARRAY) IS 'overlap count';
 
-CREATE OPERATOR "validation".&? (
+CREATE OPERATOR &? (
     LEFTARG = ANYARRAY,
     RIGHTARG = ANYARRAY,
-    FUNCTION = "validation".array_overlap_count
+    FUNCTION = array_overlap_count
     );
-COMMENT ON OPERATOR "validation".&?(ANYARRAY, ANYARRAY) IS 'overlap count';
+COMMENT ON OPERATOR &?(ANYARRAY, ANYARRAY) IS 'overlap count';

@@ -1,4 +1,4 @@
-CREATE FUNCTION "validation".jsonb_except("a" JSONB, "b" JSONB) RETURNS JSONB AS
+CREATE FUNCTION jsonb_except("a" JSONB, "b" JSONB) RETURNS JSONB AS
 $$
 BEGIN
     RETURN (SELECT jsonb_object_agg(key, value)
@@ -9,4 +9,4 @@ BEGIN
                   FROM jsonb_each_text("b")) "table"("key", "value"));
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
-COMMENT ON FUNCTION "validation".jsonb_except( JSONB, TEXT[], JSONB) IS '';
+COMMENT ON FUNCTION jsonb_except(JSONB, JSONB) IS '$1 EXCEPT $2';

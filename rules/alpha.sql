@@ -1,4 +1,4 @@
-CREATE FUNCTION "validation".alpha("value" ANYELEMENT) RETURNS BOOLEAN AS
+CREATE FUNCTION alpha("value" ANYELEMENT) RETURNS BOOLEAN AS
 $$
 BEGIN
     RETURN ("value" ~* '^[a-zA-Z]*$');
