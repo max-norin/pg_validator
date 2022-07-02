@@ -16,7 +16,7 @@ CREATE TABLE "users"
     UNIQUE ("id", "age"),
     UNIQUE ("email", "nickname")
 );
--- два одинаковых индекса без constraint
+-- two identical indexes without constraint
 CREATE UNIQUE INDEX ON "users" ("email", "age");
 CREATE UNIQUE INDEX ON "users" ("email", "age");
 

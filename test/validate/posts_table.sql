@@ -14,20 +14,20 @@ CREATE TABLE "posts"
     "title"      TEXT     NOT NULL,
     "text"       TEXT     NOT NULL CHECK ( length("text") > 5 ),
     "deleted_at" TIMESTAMP,
-    -- составные внешние ключи MATCH FULL и MATCH SIMPLE и дублирование ("user_id", "user_id", ...)
+    -- composite foreign keys MATCH FULL and MATCH SIMPLE and duplication ("user_id", "user_id", ...)
     FOREIGN KEY ("user_id", "user_id", "nickname") REFERENCES public."users" ("id", "age", "nickname") MATCH FULL ON UPDATE CASCADE,
     FOREIGN KEY ("user_id", "rating") REFERENCES public."users" ("id", "rating") MATCH FULL ON UPDATE CASCADE,
     FOREIGN KEY ("user_id", "age") REFERENCES public."users" ("id", "age") ON UPDATE CASCADE,
-    -- дополнительные которые проверять нет смысла
+    -- additional foreign keys that do not make sense to check
     FOREIGN KEY ("user_id", "nickname") REFERENCES public."users" ("id", "nickname") MATCH FULL ON UPDATE CASCADE,
     FOREIGN KEY ("user_id") REFERENCES public."users" ("id") MATCH FULL ON UPDATE CASCADE,
-    -- два внешних ключа на одну колонку, но разные таблицы
+    -- two foreign keys per column, but different tables
     FOREIGN KEY ("email") REFERENCES public."users" ("email") ON UPDATE CASCADE,
     FOREIGN KEY ("email") REFERENCES public."customers" ("email") ON UPDATE CASCADE,
-    -- два одинаковых внешних ключа
+    -- two identical foreign keys
     FOREIGN KEY ("email") REFERENCES public."customers" ("email") ON UPDATE CASCADE
 );
--- два одинаковых индекса без constraint
+-- two identical indexes without constraint
 CREATE UNIQUE INDEX ON "posts" ("title", "user_id") WHERE "deleted_at" IS NULL;
 CREATE UNIQUE INDEX ON "posts" ("title", "user_id") WHERE "posts"."deleted_at" IS NULL;
 
