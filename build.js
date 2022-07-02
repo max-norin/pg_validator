@@ -1,43 +1,15 @@
-// https://habr.com/ru/company/ruvds/blog/424969/
 import * as fs from 'fs'
 import * as path from 'path'
-
-const getFiles = function (dir, recursive = true) {
-  let result = []
-  const basename = path.basename(dir)
-  const files = fs.readdirSync(dir)
-  for (const i in files) {
-    const filename = files[i]
-    const ext = path.extname(filename)
-    if (ext !== '.sql') {
-      continue
-    }
-    const filepath = dir + '/' + filename
-    if (fs.statSync(filepath).isDirectory()) {
-      if (recursive) {
-        result = result.concat(getFiles(filepath))
-      }
-    }
-    else {
-      if (path.basename(filename, ext) === basename) {
-        result.unshift(filepath)
-      }
-      else {
-        result.push(filepath)
-      }
-    }
-  }
-  return result
-}
+import get_files from './get_files.js'
 
 const files = [
-  ...getFiles('./helpers'),
-  ...getFiles('./types', false),
-  ...getFiles('./types/set'),
-  ...getFiles('./types/constraint_def'),
-  ...getFiles('./rules'),
-  ...getFiles('./domains'),
-  ...getFiles('./validate'),
+  ...get_files('./helpers'),
+  ...get_files('./types', false),
+  ...get_files('./types/set'),
+  ...get_files('./types/constraint_def'),
+  ...get_files('./rules'),
+  ...get_files('./domains'),
+  ...get_files('./validate'),
 ]
 
 let content = ''
@@ -57,3 +29,5 @@ const name = process.env.npm_package_name
 const version = process.env.npm_package_version
 const filepath = `./dist/${name}--${version}.sql`
 fs.writeFileSync(filepath, content, 'utf8')
+
+console.log('the file is generated and located in ' + filepath)
