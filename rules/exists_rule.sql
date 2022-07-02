@@ -1,4 +1,4 @@
-CREATE FUNCTION exists_rule("table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" FK_MODE = 'full', "where" TEXT = NULL) RETURNS BOOLEAN AS
+CREATE FUNCTION exists_rule("schema_table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" FK_MODE = 'full', "where" TEXT = NULL) RETURNS BOOLEAN AS
 $$
 DECLARE
     "has_null" CONSTANT BOOLEAN = ("record" ->> "record_columns"[1]) IS NULL;
@@ -38,7 +38,7 @@ BEGIN
         RETURN TRUE;
     END IF;
 
-    "sql" = format('SELECT exists( SELECT * FROM %I WHERE (%s)=(%s) AND %s);', "table", array_to_string("table_columns", ','), array_to_string("values", ','), COALESCE("where", 'TRUE'));
+    "sql" = format('SELECT exists( SELECT * FROM %s WHERE (%s)=(%s) AND %s);', "schema_table", array_to_string("table_columns", ','), array_to_string("values", ','), COALESCE("where", 'TRUE'));
     RAISE INFO USING MESSAGE = (concat('sql: ', "sql"));
 
     EXECUTE "sql" INTO "result";

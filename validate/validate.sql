@@ -10,8 +10,10 @@ DECLARE
     "record"          CONSTANT JSONB            = to_jsonb(NEW);
     "chanced_record"  CONSTANT JSONB            = "record" - to_jsonb(OLD);
     "chanced_columns" CONSTANT SET              = ARRAY(SELECT jsonb_object_keys("chanced_record"));
+    "relid"           CONSTANT OID              = TG_RELID;
     "schema"          CONSTANT TEXT             = TG_TABLE_SCHEMA;
     "table"           CONSTANT TEXT             = TG_TABLE_NAME;
+    "schema_table"    CONSTANT TEXT             = format('%I.%I', "schema", "table");
     "stack"                    TEXT;
     "res"                      BOOLEAN;
     "f_confirmed_constraints"  CONSTRAINT_DEF[] = '{}';
@@ -23,7 +25,7 @@ DECLARE
     -- if there is UNIQUE("email") and data is correct
     -- then check UNIQUE("email", "nickname") is irrelevant
 BEGIN
-    RAISE INFO USING MESSAGE = (concat('table: ', "table"));
+    RAISE INFO USING MESSAGE = (concat('table: ', "schema_table"));
     RAISE INFO USING MESSAGE = (concat('chanced_record: ', "chanced_record"));
     -- if there are no changes, then do not checks
     IF array_length("chanced_columns", 1) IS NULL THEN
@@ -40,7 +42,7 @@ BEGIN
         SELECT a.attname
         FROM pg_attribute a
                  JOIN pg_type t ON a.atttypid = t.oid
-        WHERE a.attrelid = "table"::REGCLASS
+        WHERE a.attrelid = "relid"
           AND a.attnum > 0
           AND NOT a.attisdropped
           AND (a.attnotnull OR (t.typtype = 'd'::"char" AND t.typnotnull))
@@ -52,13 +54,13 @@ BEGIN
     -- get constraints PRIMARY KEY, UNIQUE, FOREIGN KEY and PARTIAL UNIQUE INDEX
     WITH "table"("constraint") AS (SELECT to_constraint_def(pg_get_constraintdef("pg_constraint"."oid"::OID, true), "pg_constraint"."conname")
                                    FROM "pg_constraint"
-                                   WHERE "pg_constraint"."conrelid" = "table"::REGCLASS
+                                   WHERE "pg_constraint"."conrelid" = "relid"
                                      AND "pg_constraint"."contype" IN ('f', 'p', 'u')
                                    UNION
                                    SELECT to_constraint_def(pg_get_indexdef("pg_index"."indexrelid"::OID, 0, true), "pg_class"."relname")
                                    FROM "pg_index"
                                             JOIN "pg_class" ON "pg_class"."oid" = "pg_index"."indexrelid"
-                                   WHERE "pg_index"."indrelid" = "table"::REGCLASS
+                                   WHERE "pg_index"."indrelid" = "relid"
                                      AND "pg_index"."indisunique" = true)
     SELECT array_agg("table"."constraint")
     INTO "constraints"
@@ -109,7 +111,7 @@ BEGIN
             IF ("v" ?| "constraint"."columns") OR ("constraint" @> ANY ("u_confirmed_constraints")) THEN
                 CONTINUE ;
             END IF;
-            "res" = unique_rule("table", "constraint"."columns", "record", "constraint"."where");
+            "res" = unique_rule("schema_table", "constraint"."columns", "record", "constraint"."where");
             IF ("res" IS TRUE) THEN
                 "u_confirmed_constraints" = array_append("u_confirmed_constraints", "constraint");
             ELSEIF ("res" IS FALSE) THEN
