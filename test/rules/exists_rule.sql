@@ -1,4 +1,4 @@
-SELECT "validation".exists(
+SELECT exists_rule(
                'users',
                ARRAY ['id','email'],
                '{
@@ -11,7 +11,7 @@ SELECT "validation".exists(
                NULL);
 
 
-SELECT "validation".exists(
+SELECT exists_rule(
                'users',
                NULL,
                '{
