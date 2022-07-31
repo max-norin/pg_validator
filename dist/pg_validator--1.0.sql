@@ -71,7 +71,7 @@ LANGUAGE plpgsql
 IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
-COMMENT ON FUNCTION array_unique (ANYARRAY) IS 'removes duplicate elements from array';
+COMMENT ON FUNCTION array_unique (ANYARRAY) IS 'removes duplicate elements from array, but order is violated';
 
 /*
 =================== IS_DISTINCT_FROM =================== 
