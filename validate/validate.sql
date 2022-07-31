@@ -36,7 +36,7 @@ BEGIN
     -- if function was called due to presence of ON UPDATE in FOREIGN KEY clause, then do not checks
     GET DIAGNOSTICS "stack" = PG_CONTEXT;
     RAISE INFO USING MESSAGE = (concat('stack: ', "stack"));
-    IF position(E'\n' IN "stack") > 0 THEN
+    IF "stack" !~* 'at (GET DIAGNOSTICS|SQL STATEMENT|EXECUTE)$' THEN
         RETURN NEW;
     END IF;
     -- check require rule
