@@ -74,7 +74,7 @@ BEGIN
     FROM "table"
     WHERE ("table"."constraint")."columns" && "chanced_columns";
     -- constraints group by "type"
-    FOREACH "constraint" IN ARRAY "constraints" LOOP
+    FOREACH "constraint" IN ARRAY COALESCE("constraints", ARRAY []::CONSTRAINT_DEF[]) LOOP
         CASE "constraint"."type"
         WHEN 'f' THEN
             "f_constraints" = array_append("f_constraints", "constraint");
@@ -87,7 +87,7 @@ BEGIN
         "f_constraints" = constraint_defs_sort ("f_constraints", 'DESC');
         "u_constraints" = constraint_defs_sort ("u_constraints", 'ASC');
         -- FOREIGN KEY constraints
-        FOREACH "constraint" IN ARRAY "f_constraints" LOOP
+        FOREACH "constraint" IN ARRAY COALESCE("f_constraints", ARRAY []::CONSTRAINT_DEF[]) LOOP
             RAISE DEBUG USING MESSAGE = (concat('def: ', "constraint"."content"));
             RAISE DEBUG USING MESSAGE = (concat('keys: ', "constraint"."keys"));
             RAISE DEBUG USING MESSAGE = (concat('f_cc: ', "f_confirmed_constraints"));
@@ -109,7 +109,7 @@ BEGIN
             END IF;
         END LOOP;
         -- UNIQUE constraints
-        FOREACH "constraint" IN ARRAY "u_constraints" LOOP
+        FOREACH "constraint" IN ARRAY COALESCE("u_constraints", ARRAY []::CONSTRAINT_DEF[]) LOOP
             RAISE DEBUG USING MESSAGE = (concat('def: ', "constraint"."content"));
             RAISE DEBUG USING MESSAGE = (concat('keys: ', "constraint"."keys"));
             RAISE DEBUG USING MESSAGE = (concat('u_cc: ', "u_confirmed_constraints"));
