@@ -47,6 +47,7 @@ BEGIN
     WHERE a.attrelid = "relid"
         AND a.attnum > 0
         AND NOT a.attisdropped
+        AND a.attgenerated = ''
         AND (a.attnotnull
             OR (t.typtype = 'd'::"char"
                 AND t.typnotnull))
