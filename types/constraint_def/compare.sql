@@ -2,7 +2,7 @@ CREATE FUNCTION constraint_def_eq ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF)
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN ("a"."where" = != "b"."where") AND ("a"."keys" = "b"."keys");
+    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" = "b"."keys");
 END;
 $$
 LANGUAGE plpgsql
@@ -30,7 +30,7 @@ CREATE FUNCTION constraint_def_contained ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN ("a"."where" = != "b"."where") AND ("a"."keys" <@ "b"."keys");
+    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" <@ "b"."keys");
 END;
 $$
 LANGUAGE plpgsql
@@ -48,7 +48,7 @@ CREATE FUNCTION constraint_def_contains ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF)
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN ("a"."where" = != "b"."where") AND ("a"."keys" @> "b"."keys");
+    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" @> "b"."keys");
 END;
 $$
 LANGUAGE plpgsql
