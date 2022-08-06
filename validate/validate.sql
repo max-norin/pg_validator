@@ -10,8 +10,7 @@ DECLARE
     "u_constraints" CONSTRAINT_DEF[] = '{}';
     "record" CONSTANT JSONB = to_jsonb (NEW);
     "chanced_record" CONSTANT JSONB = "record" - to_jsonb (OLD);
-    "chanced_columns" CONSTANT SET = ARRAY (
-    SELECT jsonb_object_keys("chanced_record"));
+    "chanced_columns" CONSTANT SET = ARRAY (SELECT jsonb_object_keys("chanced_record"));
     "relid" CONSTANT OID = TG_RELID;
     "schema" CONSTANT TEXT = TG_TABLE_SCHEMA;
     "table" CONSTANT TEXT = TG_TABLE_NAME;
