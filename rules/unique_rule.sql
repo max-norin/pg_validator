@@ -1,10 +1,11 @@
-CREATE FUNCTION unique_rule ("schema_table" TEXT, "columns" TEXT[], "record" JSONB, "where" TEXT)
+CREATE FUNCTION unique_rule ("relid" REGCLASS, "columns" TEXT[], "record" JSONB, "where" TEXT = 'TRUE')
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN @extschema@.exists_rule ("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
+    RETURN @extschema@.exists_rule ("relid", "columns", "record", "columns", 'simple', "where") IS FALSE;
 END;
 $$
 LANGUAGE plpgsql
+RETURNS NULL ON NULL INPUT
 STABLE;
 

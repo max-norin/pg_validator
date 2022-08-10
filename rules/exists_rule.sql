@@ -1,14 +1,14 @@
-CREATE FUNCTION exists_rule ("schema_table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" @extschema@.FK_MODE = 'full', "where" TEXT = NULL)
+CREATE FUNCTION exists_rule ("relid" REGCLASS, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" @extschema@.FK_MODE = 'full', "where" TEXT = 'TRUE')
     RETURNS BOOLEAN
     AS $$
 DECLARE
-    "has_null" CONSTANT BOOLEAN = ("record" ->> "record_columns"[1]) IS NULL;
-    "is_null" BOOLEAN;
-    "index" INT;
-    "length" CONSTANT INT = array_length("table_columns", 1);
-    "values" TEXT[] = '{}';
-    "sql" TEXT;
-    "result" BOOLEAN = FALSE;
+    "has_null" CONSTANT BOOLEAN NOT NULL = ("record" ->> "record_columns"[1]) IS NULL;
+    "is_null"           BOOLEAN;
+    "index"             INT;
+    "length"   CONSTANT INT              = array_length("table_columns", 1);
+    "values"            TEXT[] NOT NULL  = '{}';
+    "sql"               TEXT;
+    "result"            BOOLEAN NOT NULL = FALSE;
 BEGIN
     IF ("length" IS NULL) OR ("length" OPERATOR ( @extschema@.<!> ) array_length("record_columns", 1)) THEN
         RETURN FALSE;
@@ -37,12 +37,13 @@ BEGIN
         -- number of values is equal to number of NULL
         RETURN TRUE;
     END IF;
-    "sql" = format('SELECT exists( SELECT * FROM %s WHERE (%s)=(%s) AND %s);', "schema_table", array_to_string("table_columns", ','), array_to_string("values", ','), COALESCE("where", 'TRUE'));
+    "sql" = format('SELECT exists( SELECT * FROM %s WHERE (%s)=(%s) AND %s);', "relid", array_to_string("table_columns", ','), array_to_string("values", ','), COALESCE("where", 'TRUE'));
     RAISE INFO USING MESSAGE = (concat('sql: ', "sql"));
     EXECUTE "sql" INTO "result";
     RETURN "result";
 END;
 $$
 LANGUAGE plpgsql
+RETURNS NULL ON NULL INPUT
 STABLE;
 
