@@ -26,6 +26,8 @@ CREATE EXTENSION "pg_validator"
     VERSION '1.0';
 ```
 
+[More about the extension and the control file](https://www.postgresql.org/docs/current/extend-extensions.html)
+
 ### Usage
 
 To perform the check, you need to add `trigger_validate()` trigger from the extension to the table.

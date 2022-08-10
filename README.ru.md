@@ -23,6 +23,8 @@ CREATE EXTENSION "pg_validator"
     VERSION '1.0';
 ```
 
+[Подробнее про расширение и файл control](https://postgrespro.ru/docs/postgresql/14/extend-extensions)
+
 ### Использование
 
 Чтобы осуществить проверку данных, нужно к таблице добавить триггер `trigger_validate()` из
