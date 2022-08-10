@@ -10,7 +10,7 @@
 
 ```
 [22000] ERROR: {"id": ["unique"], "email": ["exists"], "title": ["require"]}
-Where: PL/pgSQL function trigger_validate() line 125 at RAISE
+Context: PL/pgSQL function trigger_validate() line 125 at RAISE
 ```
 
 ## Getting Started
