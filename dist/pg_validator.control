@@ -2,4 +2,3 @@ comment = 'data validator to check before COMMIT'
 default_version = '1.0'
 module_pathname = '$libdir/pg_validator'
 relocatable = false
-schema = 'validator'
