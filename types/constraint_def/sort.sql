@@ -1,5 +1,5 @@
-CREATE FUNCTION constraint_defs_sort ("constraints" CONSTRAINT_DEF[], "direction" SORT_DIRECTION)
-    RETURNS CONSTRAINT_DEF[]
+CREATE FUNCTION constraint_defs_sort ("constraints" @extschema@.CONSTRAINT_DEF[], "direction" @extschema@.SORT_DIRECTION)
+    RETURNS @extschema@.CONSTRAINT_DEF[]
     AS $$
 DECLARE
     "all_columns" TEXT[] = '{}';
@@ -36,7 +36,7 @@ BEGIN
         SELECT "table".*
         FROM unnest("constraints") "table"
         ORDER BY (CASE WHEN "table"."where" IS NULL THEN 1 ELSE -1 END) * "direction"::INTEGER,
-                 ("table"."columns" &? "weighty_columns") * "direction"::INTEGER
+                 ("table"."columns" OPERATOR ( @extschema@.&? ) "weighty_columns") * "direction"::INTEGER
 )
     SELECT array_agg("table".*)
     INTO "constraints"
@@ -47,5 +47,5 @@ $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
-COMMENT ON FUNCTION constraint_defs_sort (CONSTRAINT_DEF[], SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';
+COMMENT ON FUNCTION constraint_defs_sort (@extschema@.CONSTRAINT_DEF[], @extschema@.SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';
 

@@ -1,13 +1,13 @@
 CREATE TABLE "public"."customers" (
-    "email" EMAIL PRIMARY KEY
+    "email" validator.EMAIL PRIMARY KEY
 );
 
 CREATE TABLE "public"."posts" (
     "id" SERIAL PRIMARY KEY,
     "user_id" INTEGER NOT NULL,
-    "email" EMAIL NOT NULL,
-    "nickname" NICKNAME NOT NULL,
-    "rating" FLOAT, "age" UNSIGNED_INT,
+    "email" validator.EMAIL NOT NULL,
+    "nickname" validator.NICKNAME NOT NULL,
+    "rating" FLOAT, "age" validator.UNSIGNED_INT,
     "title" TEXT NOT NULL,
     "text" TEXT NOT NULL CHECK (length("text") > 5),
     "deleted_at" TIMESTAMP,
@@ -31,7 +31,7 @@ CREATE UNIQUE INDEX ON "public"."posts" ("title", "user_id") WHERE "public"."pos
 CREATE TRIGGER "validate"
     BEFORE INSERT OR UPDATE ON "public"."posts"
     FOR EACH ROW
-    EXECUTE FUNCTION trigger_validate ();
+    EXECUTE FUNCTION validator.trigger_validate ();
 
 INSERT INTO "public"."customers" ("email")
     VALUES ('email@email.em'),

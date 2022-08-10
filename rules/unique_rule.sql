@@ -2,7 +2,7 @@ CREATE FUNCTION unique_rule ("schema_table" TEXT, "columns" TEXT[], "record" JSO
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN exists_rule ("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
+    RETURN @extschema@.exists_rule ("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
 END;
 $$
 LANGUAGE plpgsql

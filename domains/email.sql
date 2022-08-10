@@ -1,3 +1,3 @@
 CREATE DOMAIN EMAIL AS VARCHAR(255)
-    CHECK (email (VALUE));
+    CHECK (@extschema@.email (VALUE));
 

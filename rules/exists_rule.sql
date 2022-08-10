@@ -1,4 +1,4 @@
-CREATE FUNCTION exists_rule ("schema_table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" FK_MODE = 'full', "where" TEXT = NULL)
+CREATE FUNCTION exists_rule ("schema_table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" @extschema@.FK_MODE = 'full', "where" TEXT = NULL)
     RETURNS BOOLEAN
     AS $$
 DECLARE
@@ -10,7 +10,7 @@ DECLARE
     "sql" TEXT;
     "result" BOOLEAN = FALSE;
 BEGIN
-    IF ("length" IS NULL) OR ("length" <!> array_length("record_columns", 1)) THEN
+    IF ("length" IS NULL) OR ("length" OPERATOR ( @extschema@.<!> ) array_length("record_columns", 1)) THEN
         RETURN FALSE;
     END IF;
     -- get "values" array of escaped variables

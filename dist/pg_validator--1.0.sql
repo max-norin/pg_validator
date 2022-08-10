@@ -219,8 +219,8 @@ CREATE CAST (SORT_DIRECTION AS INTEGER) WITH FUNCTION sort_direction_to_int (SOR
 =================== SET =================== 
 */
 CREATE DOMAIN SET AS TEXT[]
-    CONSTRAINT "null_check" CHECK (NOT (NULL::TEXT =!= ANY (VALUE)))
-    CONSTRAINT "unique_check" CHECK (array_is_unique (VALUE));
+    CONSTRAINT "null_check" CHECK (NOT (NULL::TEXT OPERATOR ( @extschema@.=!= ) ANY (VALUE)))
+    CONSTRAINT "unique_check" CHECK (@extschema@.array_is_unique (VALUE));
 
 COMMENT ON DOMAIN SET IS 'mathematical set';
 
@@ -285,20 +285,20 @@ COMMENT ON OPERATOR != (SET, SET) IS 'comparison of sets for not equality';
 CREATE TYPE CONSTRAINT_DEF AS (
     "content" TEXT,
     "name" TEXT,
-    "type" CONSTRAINT_TYPE,
+    "type" @extschema@.CONSTRAINT_TYPE,
     "columns" TEXT[],
     "fk_table" TEXT,
     "fk_columns" TEXT[],
-    "fk_mode" FK_MODE,
+    "fk_mode" @extschema@.FK_MODE,
     "where" TEXT,
-    "keys" SET
+    "keys" @extschema@.SET
 );
 
 CREATE FUNCTION to_constraint_def ("content" TEXT, "name" TEXT)
-    RETURNS CONSTRAINT_DEF
+    RETURNS @extschema@.CONSTRAINT_DEF
     AS $$
 DECLARE
-    "result" CONSTRAINT_DEF;
+    "result" @extschema@.CONSTRAINT_DEF;
     "match" TEXT[];
 BEGIN
     "result"."content" = "content";
@@ -306,19 +306,19 @@ BEGIN
     "match" = regexp_match("content", '(PRIMARY\s+KEY|UNIQUE).*?\((.+?)\).*?(WHERE(.+?))?$', 'i');
     IF "match"[2] IS NOT NULL THEN
         "result"."type" = 'u';
-        "result"."columns" = to_columns ("match"[2]);
+        "result"."columns" = @extschema@.to_columns ("match"[2]);
         "result"."where" = "match"[4];
-        "result"."keys" = "result"."columns"::SET;
+        "result"."keys" = "result"."columns"::@extschema@.SET;
         RETURN "result";
     END IF;
     "match" = regexp_match("content", 'FOREIGN\s+KEY\s+\((.+?)\)\s+REFERENCES\s+(.+?)\s*\((.+?)\)\s*(MATCH\s*(SIMPLE|FULL))?', 'i');
     IF "match"[1] IS NOT NULL THEN
         "result"."type" = 'f';
-        "result"."columns" = to_columns ("match"[1]);
+        "result"."columns" = @extschema@.to_columns ("match"[1]);
         "result"."fk_table" = "match"[2];
-        "result"."fk_columns" = to_columns ("match"[3]);
+        "result"."fk_columns" = @extschema@.to_columns ("match"[3]);
         "result"."fk_mode" = COALESCE(lower("match"[5]), 'simple');
-        SELECT array_agg(format('%I:%I.%I', "col", "result"."fk_table", "result"."fk_columns"["index"]))::SET
+        SELECT array_agg(format('%I:%I.%I', "col", "result"."fk_table", "result"."fk_columns"["index"]))::@extschema@.SET
         INTO "result"."keys"
         FROM unnest("result"."columns") WITH ORDINALITY AS "table" ("col", "index");
         RETURN "result";
@@ -332,21 +332,21 @@ IMMUTABLE;
 /*
 =================== COMPARE =================== 
 */
-CREATE FUNCTION constraint_def_eq ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF)
+CREATE FUNCTION constraint_def_eq ("a" @extschema@.CONSTRAINT_DEF, "b" @extschema@.CONSTRAINT_DEF)
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" = "b"."keys");
+    RETURN ("a"."where" OPERATOR ( @extschema@.=!= ) "b"."where") AND ("a"."keys" = "b"."keys");
 END;
 $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
 CREATE OPERATOR = (
-    LEFTARG = CONSTRAINT_DEF, RIGHTARG = CONSTRAINT_DEF, NEGATOR = !=, RESTRICT = eqsel, FUNCTION = constraint_def_eq
+    LEFTARG = @extschema@.CONSTRAINT_DEF, RIGHTARG = @extschema@.CONSTRAINT_DEF, NEGATOR = !=, RESTRICT = eqsel, FUNCTION = constraint_def_eq
 );
 
-CREATE FUNCTION constraint_def_neq ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF)
+CREATE FUNCTION constraint_def_neq ("a" @extschema@.CONSTRAINT_DEF, "b" @extschema@.CONSTRAINT_DEF)
     RETURNS BOOLEAN
     AS $$
 BEGIN
@@ -357,50 +357,50 @@ LANGUAGE plpgsql
 IMMUTABLE;
 
 CREATE OPERATOR != (
-    LEFTARG = CONSTRAINT_DEF, RIGHTARG = CONSTRAINT_DEF, NEGATOR = =, RESTRICT = neqsel, FUNCTION = constraint_def_neq
+    LEFTARG = @extschema@.CONSTRAINT_DEF, RIGHTARG = @extschema@.CONSTRAINT_DEF, NEGATOR = =, RESTRICT = neqsel, FUNCTION = constraint_def_neq
 );
 
-CREATE FUNCTION constraint_def_contained ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF)
+CREATE FUNCTION constraint_def_contained ("a" @extschema@.CONSTRAINT_DEF, "b" @extschema@.CONSTRAINT_DEF)
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" <@ "b"."keys");
+    RETURN ("a"."where" OPERATOR ( @extschema@.=!= ) "b"."where") AND ("a"."keys" <@ "b"."keys");
 END;
 $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
-COMMENT ON FUNCTION constraint_def_contained (CONSTRAINT_DEF, CONSTRAINT_DEF) IS 'is contained by';
+COMMENT ON FUNCTION constraint_def_contained (@extschema@.CONSTRAINT_DEF, @extschema@.CONSTRAINT_DEF) IS 'is contained by';
 
 CREATE OPERATOR <@ (
-    LEFTARG = CONSTRAINT_DEF, RIGHTARG = CONSTRAINT_DEF, COMMUTATOR = @>, RESTRICT = arraycontsel, FUNCTION = constraint_def_contained
+    LEFTARG = @extschema@.CONSTRAINT_DEF, RIGHTARG = @extschema@.CONSTRAINT_DEF, COMMUTATOR = @>, RESTRICT = arraycontsel, FUNCTION = constraint_def_contained
 );
 
-COMMENT ON OPERATOR <@ (CONSTRAINT_DEF, CONSTRAINT_DEF) IS 'is contained by';
+COMMENT ON OPERATOR <@ (@extschema@.CONSTRAINT_DEF, @extschema@.CONSTRAINT_DEF) IS 'is contained by';
 
-CREATE FUNCTION constraint_def_contains ("a" CONSTRAINT_DEF, "b" CONSTRAINT_DEF)
+CREATE FUNCTION constraint_def_contains ("a" @extschema@.CONSTRAINT_DEF, "b" @extschema@.CONSTRAINT_DEF)
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN ("a"."where" =!= "b"."where") AND ("a"."keys" @> "b"."keys");
+    RETURN ("a"."where" OPERATOR ( @extschema@.=!= ) "b"."where") AND ("a"."keys" @> "b"."keys");
 END;
 $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
-COMMENT ON FUNCTION constraint_def_contains (CONSTRAINT_DEF, CONSTRAINT_DEF) IS 'contains';
+COMMENT ON FUNCTION constraint_def_contains (@extschema@.CONSTRAINT_DEF, @extschema@.CONSTRAINT_DEF) IS 'contains';
 
 CREATE OPERATOR @> (
-    LEFTARG = CONSTRAINT_DEF, RIGHTARG = CONSTRAINT_DEF, COMMUTATOR = <@, RESTRICT = arraycontsel, FUNCTION = constraint_def_contains
+    LEFTARG = @extschema@.CONSTRAINT_DEF, RIGHTARG = @extschema@.CONSTRAINT_DEF, COMMUTATOR = <@, RESTRICT = arraycontsel, FUNCTION = constraint_def_contains
 );
 
-COMMENT ON OPERATOR @> (CONSTRAINT_DEF, CONSTRAINT_DEF) IS 'contains';
+COMMENT ON OPERATOR @> (@extschema@.CONSTRAINT_DEF, @extschema@.CONSTRAINT_DEF) IS 'contains';
 
 /*
 =================== SORT =================== 
 */
-CREATE FUNCTION constraint_defs_sort ("constraints" CONSTRAINT_DEF[], "direction" SORT_DIRECTION)
-    RETURNS CONSTRAINT_DEF[]
+CREATE FUNCTION constraint_defs_sort ("constraints" @extschema@.CONSTRAINT_DEF[], "direction" @extschema@.SORT_DIRECTION)
+    RETURNS @extschema@.CONSTRAINT_DEF[]
     AS $$
 DECLARE
     "all_columns" TEXT[] = '{}';
@@ -437,7 +437,7 @@ BEGIN
         SELECT "table".*
         FROM unnest("constraints") "table"
         ORDER BY (CASE WHEN "table"."where" IS NULL THEN 1 ELSE -1 END) * "direction"::INTEGER,
-                 ("table"."columns" &? "weighty_columns") * "direction"::INTEGER
+                 ("table"."columns" OPERATOR ( @extschema@.&? ) "weighty_columns") * "direction"::INTEGER
 )
     SELECT array_agg("table".*)
     INTO "constraints"
@@ -448,7 +448,7 @@ $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
-COMMENT ON FUNCTION constraint_defs_sort (CONSTRAINT_DEF[], SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';
+COMMENT ON FUNCTION constraint_defs_sort (@extschema@.CONSTRAINT_DEF[], @extschema@.SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';
 
 /*
 =================== ALPHA =================== 
@@ -488,7 +488,7 @@ RETURNS NULL ON NULL INPUT;
 /*
 =================== EXISTS_RULE =================== 
 */
-CREATE FUNCTION exists_rule ("schema_table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" FK_MODE = 'full', "where" TEXT = NULL)
+CREATE FUNCTION exists_rule ("schema_table" TEXT, "table_columns" TEXT[], "record" JSONB, "record_columns" TEXT[], "mode" @extschema@.FK_MODE = 'full', "where" TEXT = NULL)
     RETURNS BOOLEAN
     AS $$
 DECLARE
@@ -500,7 +500,7 @@ DECLARE
     "sql" TEXT;
     "result" BOOLEAN = FALSE;
 BEGIN
-    IF ("length" IS NULL) OR ("length" <!> array_length("record_columns", 1)) THEN
+    IF ("length" IS NULL) OR ("length" OPERATOR ( @extschema@.<!> ) array_length("record_columns", 1)) THEN
         RETURN FALSE;
     END IF;
     -- get "values" array of escaped variables
@@ -581,7 +581,7 @@ CREATE FUNCTION unique_rule ("schema_table" TEXT, "columns" TEXT[], "record" JSO
     RETURNS BOOLEAN
     AS $$
 BEGIN
-    RETURN exists_rule ("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
+    RETURN @extschema@.exists_rule ("schema_table", "columns", "record", "columns", 'simple', "where") IS FALSE;
 END;
 $$
 LANGUAGE plpgsql
@@ -610,19 +610,19 @@ RETURNS NULL ON NULL INPUT;
 =================== ALPHA =================== 
 */
 CREATE DOMAIN ALPHA AS VARCHAR(255)
-    CHECK (alpha (VALUE));
+    CHECK (@extschema@.alpha (VALUE));
 
 /*
 =================== EMAIL =================== 
 */
 CREATE DOMAIN EMAIL AS VARCHAR(255)
-    CHECK (email (VALUE));
+    CHECK (@extschema@.email (VALUE));
 
 /*
 =================== NICKNAME =================== 
 */
 CREATE DOMAIN NICKNAME AS VARCHAR(100)
-    CHECK (nickname (VALUE));
+    CHECK (@extschema@.nickname (VALUE));
 
 /*
 =================== UNSIGNED_BIGINT =================== 
@@ -640,7 +640,7 @@ CREATE DOMAIN UNSIGNED_INT AS INTEGER
 =================== URL =================== 
 */
 CREATE DOMAIN URL AS VARCHAR(255)
-    CHECK (url (VALUE));
+    CHECK (@extschema@.url (VALUE));
 
 /*
 =================== VALIDATE =================== 
@@ -651,25 +651,24 @@ CREATE FUNCTION trigger_validate ()
 DECLARE
     "v" JSONB = '{}';
     "column" TEXT;
-    "constraint" CONSTRAINT_DEF;
-    "constraints" CONSTRAINT_DEF[] = '{}';
-    "f_constraints" CONSTRAINT_DEF[] = '{}';
-    "u_constraints" CONSTRAINT_DEF[] = '{}';
+    "constraint" @extschema@.CONSTRAINT_DEF;
+    "constraints" @extschema@.CONSTRAINT_DEF[] = '{}';
+    "f_constraints" @extschema@.CONSTRAINT_DEF[] = '{}';
+    "u_constraints" @extschema@.CONSTRAINT_DEF[] = '{}';
     "record" CONSTANT JSONB = to_jsonb (NEW);
-    "chanced_record" CONSTANT JSONB = "record" - to_jsonb (OLD);
-    "chanced_columns" CONSTANT SET = ARRAY (
-    SELECT jsonb_object_keys("chanced_record"));
+    "chanced_record" CONSTANT JSONB = "record" OPERATOR ( @extschema@.- ) to_jsonb (OLD);
+    "chanced_columns" CONSTANT @extschema@.SET = ARRAY (SELECT jsonb_object_keys("chanced_record"));
     "relid" CONSTANT OID = TG_RELID;
     "schema" CONSTANT TEXT = TG_TABLE_SCHEMA;
     "table" CONSTANT TEXT = TG_TABLE_NAME;
     "schema_table" CONSTANT TEXT = format('%I.%I', "schema", "table");
     "stack" TEXT;
     "res" BOOLEAN;
-    "f_confirmed_constraints" CONSTRAINT_DEF[] = '{}';
+    "f_confirmed_constraints" @extschema@.CONSTRAINT_DEF[] = '{}';
     -- variable stores successful constraints to avoid doing same check multiple times
     -- if there is FOREIGN KEY ("user_id", "email") REFERENCES "users"("id", "email") and data is correct
     -- then check FOREIGN KEY ("user_id") REFERENCES "users"("id") and FOREIGN KEY ("email") REFERENCES "users"("email") is irrelevant
-    "u_confirmed_constraints" CONSTRAINT_DEF[] = '{}';
+    "u_confirmed_constraints" @extschema@.CONSTRAINT_DEF[] = '{}';
     -- variable stores successful constraints to avoid doing same check multiple times
     -- if there is UNIQUE("email") and data is correct
     -- then check UNIQUE("email", "nickname") is irrelevant
@@ -699,18 +698,18 @@ BEGIN
             OR (t.typtype = 'd'::"char"
                 AND t.typnotnull))
             LOOP
-                IF ("chanced_record" ? "column") AND (NOT require_rule ("chanced_record" ->> "column")) THEN
-                    "v" = jsonb_array_append ("v", ARRAY["column"], '"require"'::JSONB);
+                IF ("chanced_record" ? "column") AND (NOT @extschema@.require_rule ("chanced_record" ->> "column")) THEN
+                    "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"require"'::JSONB);
                 END IF;
             END LOOP;
     -- get constraints PRIMARY KEY, UNIQUE, FOREIGN KEY and PARTIAL UNIQUE INDEX
     WITH "table" ("constraint") AS (
-        SELECT to_constraint_def (pg_get_constraintdef("pg_constraint"."oid"::OID, TRUE), "pg_constraint"."conname")
+        SELECT @extschema@.to_constraint_def (pg_get_constraintdef("pg_constraint"."oid"::OID, TRUE), "pg_constraint"."conname")
         FROM "pg_constraint"
         WHERE "pg_constraint"."conrelid" = "relid"
             AND "pg_constraint"."contype" IN ('f', 'p', 'u')
         UNION
-        SELECT to_constraint_def (pg_get_indexdef("pg_index"."indexrelid"::OID, 0, TRUE), "pg_class"."relname")
+        SELECT @extschema@.to_constraint_def (pg_get_indexdef("pg_index"."indexrelid"::OID, 0, TRUE), "pg_class"."relname")
         FROM "pg_index"
             JOIN "pg_class" ON "pg_class"."oid" = "pg_index"."indexrelid"
         WHERE "pg_index"."indrelid" = "relid"
@@ -721,7 +720,7 @@ BEGIN
     FROM "table"
     WHERE ("table"."constraint")."columns" && "chanced_columns";
     -- constraints group by "type"
-    FOREACH "constraint" IN ARRAY COALESCE("constraints", ARRAY []::CONSTRAINT_DEF[]) LOOP
+    FOREACH "constraint" IN ARRAY COALESCE("constraints", ARRAY []::@extschema@.CONSTRAINT_DEF[]) LOOP
         CASE "constraint"."type"
         WHEN 'f' THEN
             "f_constraints" = array_append("f_constraints", "constraint");
@@ -731,44 +730,44 @@ BEGIN
         END CASE;
         END LOOP;
         -- constraints order by priority
-        "f_constraints" = constraint_defs_sort ("f_constraints", 'DESC');
-        "u_constraints" = constraint_defs_sort ("u_constraints", 'ASC');
+        "f_constraints" = @extschema@.constraint_defs_sort ("f_constraints", 'DESC');
+        "u_constraints" = @extschema@.constraint_defs_sort ("u_constraints", 'ASC');
         -- FOREIGN KEY constraints
-        FOREACH "constraint" IN ARRAY COALESCE("f_constraints", ARRAY []::CONSTRAINT_DEF[]) LOOP
+        FOREACH "constraint" IN ARRAY COALESCE("f_constraints", ARRAY []::@extschema@.CONSTRAINT_DEF[]) LOOP
             RAISE DEBUG USING MESSAGE = (concat('def: ', "constraint"."content"));
             RAISE DEBUG USING MESSAGE = (concat('keys: ', "constraint"."keys"));
             RAISE DEBUG USING MESSAGE = (concat('f_cc: ', "f_confirmed_constraints"));
-            IF ("v" ?| "constraint"."columns") OR ("constraint" <@ ANY ("f_confirmed_constraints")) THEN
+            IF ("v" ?| "constraint"."columns") OR ("constraint" OPERATOR ( @extschema@.<@ ) ANY ("f_confirmed_constraints")) THEN
                 CONTINUE;
             END IF;
-            "res" = exists_rule ("constraint"."fk_table", "constraint"."fk_columns", "record", "constraint"."columns", "constraint"."fk_mode", NULL::TEXT);
+            "res" = @extschema@.exists_rule ("constraint"."fk_table", "constraint"."fk_columns", "record", "constraint"."columns", "constraint"."fk_mode", NULL::TEXT);
             IF ("res" IS TRUE) THEN
                 "f_confirmed_constraints" = array_append("f_confirmed_constraints", "constraint");
                 ELSEIF ("res" IS FALSE) THEN
                 -- array_unique because fk can be assigned
                 -- FOREIGN KEY ("user_id", "user_id", "nickname") REFERENCES public."users" ("id", "age", "nickname")
                 -- where "user_id" can repeat
-                FOREACH "column" IN ARRAY array_unique ("constraint"."columns")
+                FOREACH "column" IN ARRAY @extschema@.array_unique ("constraint"."columns")
                 LOOP
-                    "v" = jsonb_array_append ("v", ARRAY["column"], '"exists"'::JSONB);
+                    "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"exists"'::JSONB);
                     -- to_jsonb('exists:' || "constraint"."name")
                 END LOOP;
             END IF;
         END LOOP;
         -- UNIQUE constraints
-        FOREACH "constraint" IN ARRAY COALESCE("u_constraints", ARRAY []::CONSTRAINT_DEF[]) LOOP
+        FOREACH "constraint" IN ARRAY COALESCE("u_constraints", ARRAY []::@extschema@.CONSTRAINT_DEF[]) LOOP
             RAISE DEBUG USING MESSAGE = (concat('def: ', "constraint"."content"));
             RAISE DEBUG USING MESSAGE = (concat('keys: ', "constraint"."keys"));
             RAISE DEBUG USING MESSAGE = (concat('u_cc: ', "u_confirmed_constraints"));
-            IF ("v" ?| "constraint"."columns") OR ("constraint" @> ANY ("u_confirmed_constraints")) THEN
+            IF ("v" ?| "constraint"."columns") OR ("constraint" OPERATOR ( @extschema@.@> ) ANY ("u_confirmed_constraints")) THEN
                 CONTINUE;
             END IF;
-            "res" = unique_rule ("schema_table", "constraint"."columns", "record", "constraint"."where");
+            "res" = @extschema@.unique_rule ("schema_table", "constraint"."columns", "record", "constraint"."where");
             IF ("res" IS TRUE) THEN
                 "u_confirmed_constraints" = array_append("u_confirmed_constraints", "constraint");
                 ELSEIF ("res" IS FALSE) THEN
                 FOREACH "column" IN ARRAY "constraint"."columns" LOOP
-                    "v" = jsonb_array_append ("v", ARRAY["column"], '"unique"'::JSONB);
+                    "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"unique"'::JSONB);
                     -- to_jsonb('unique:' || "constraint"."name")
                 END LOOP;
             END IF;
