@@ -3,7 +3,7 @@ CREATE FUNCTION trigger_validate ()
     AS $$
 DECLARE
     "v"                        JSONB                                = '{}';
-    "constraints"   @extschema@.CONSTRAINT_DEF[] NOT NULL           = '{}';
+    "constraints"   @extschema@.CONSTRAINT_DEF[]                    = '{}';
     "f_constraints" @extschema@.CONSTRAINT_DEF[] NOT NULL           = '{}';
     "u_constraints" @extschema@.CONSTRAINT_DEF[] NOT NULL           = '{}';
     "record" CONSTANT          JSONB NOT NULL                       = to_jsonb(NEW);
