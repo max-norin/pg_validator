@@ -3,7 +3,7 @@ Docs where the regular expression comes from
 - [mathiasbynens/url-regex](https://mathiasbynens.be/demo/url-regex) @diegoperini
 - [datatracker.ietf.org](https://datatracker.ietf.org/doc/html/rfc3986)
  */
-CREATE FUNCTION url ("value" ANYELEMENT)
+CREATE FUNCTION url_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN

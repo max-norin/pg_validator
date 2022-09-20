@@ -108,13 +108,13 @@ SELECT pg_catalog.current_setting('client_min_messages'::TEXT);
     - [fk_mode](./types/fk_mode.sql) - `emun('full','simple')`
     - [sort_direction](./types/sort_direction.sql) - `emun('ASC','DESC')`
 - `rules/*.sql` - popular rules
-    - [alpha](./rules/alpha.sql)
-    - [email](./rules/email.sql)
+    - [alpha](rules/alpha_rule.sql)
+    - [email](rules/email_rule.sql)
     - [exists](./rules/exists_rule.sql)
-    - [nickname](./rules/nickname.sql)
+    - [nickname](rules/nickname_rule.sql)
     - [require](./rules/require_rule.sql)
     - [unique](./rules/unique_rule.sql)
-    - [url](./rules/url.sql)
+    - [url](rules/url_rule.sql)
 - `domains/*.sql` - popular domains
     - [alpha](./domains/alpha.sql)
     - [email](./domains/email.sql)

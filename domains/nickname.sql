@@ -1,3 +1,3 @@
 CREATE DOMAIN NICKNAME AS VARCHAR(100)
-    CHECK (@extschema@.nickname (VALUE));
+    CHECK (@extschema@.nickname_rule (VALUE));
 

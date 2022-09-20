@@ -1,3 +1,3 @@
 CREATE DOMAIN URL AS VARCHAR(255)
-    CHECK (@extschema@.url (VALUE));
+    CHECK (@extschema@.url_rule (VALUE));
 

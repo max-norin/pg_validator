@@ -1,4 +1,4 @@
-CREATE FUNCTION nickname ("value" ANYELEMENT)
+CREATE FUNCTION nickname_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN

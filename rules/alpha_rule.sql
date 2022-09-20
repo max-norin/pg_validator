@@ -1,4 +1,4 @@
-CREATE FUNCTION alpha ("value" ANYELEMENT)
+CREATE FUNCTION alpha_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN

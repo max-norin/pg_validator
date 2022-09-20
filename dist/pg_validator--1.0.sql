@@ -451,9 +451,9 @@ IMMUTABLE;
 COMMENT ON FUNCTION constraint_defs_sort (@extschema@.CONSTRAINT_DEF[], @extschema@.SORT_DIRECTION) IS 'sort constraints on frequency of used "columns" without "where"';
 
 /*
-=================== ALPHA =================== 
+=================== ALPHA_RULE =================== 
 */
-CREATE FUNCTION alpha ("value" ANYELEMENT)
+CREATE FUNCTION alpha_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN
@@ -465,7 +465,7 @@ IMMUTABLE
 RETURNS NULL ON NULL INPUT;
 
 /*
-=================== EMAIL =================== 
+=================== EMAIL_RULE =================== 
 */
 /**
 Docs where the regular expression comes from
@@ -474,7 +474,7 @@ Docs where the regular expression comes from
 - [regular-expressions.info](https://www.regular-expressions.info/email.html)
 - [emailregex](https://emailregex.com/)
  */
-CREATE FUNCTION email ("value" ANYELEMENT)
+CREATE FUNCTION email_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN
@@ -538,9 +538,9 @@ RETURNS NULL ON NULL INPUT
 STABLE;
 
 /*
-=================== NICKNAME =================== 
+=================== NICKNAME_RULE =================== 
 */
-CREATE FUNCTION nickname ("value" ANYELEMENT)
+CREATE FUNCTION nickname_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN
@@ -590,14 +590,14 @@ RETURNS NULL ON NULL INPUT
 STABLE;
 
 /*
-=================== URL =================== 
+=================== URL_RULE =================== 
 */
 /**
 Docs where the regular expression comes from
 - [mathiasbynens/url-regex](https://mathiasbynens.be/demo/url-regex) @diegoperini
 - [datatracker.ietf.org](https://datatracker.ietf.org/doc/html/rfc3986)
  */
-CREATE FUNCTION url ("value" ANYELEMENT)
+CREATE FUNCTION url_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN
@@ -612,19 +612,19 @@ RETURNS NULL ON NULL INPUT;
 =================== ALPHA =================== 
 */
 CREATE DOMAIN ALPHA AS VARCHAR(255)
-    CHECK (@extschema@.alpha (VALUE));
+    CHECK (@extschema@.alpha_rule (VALUE));
 
 /*
 =================== EMAIL =================== 
 */
 CREATE DOMAIN EMAIL AS VARCHAR(255)
-    CHECK (@extschema@.email (VALUE));
+    CHECK (@extschema@.email_rule (VALUE));
 
 /*
 =================== NICKNAME =================== 
 */
 CREATE DOMAIN NICKNAME AS VARCHAR(100)
-    CHECK (@extschema@.nickname (VALUE));
+    CHECK (@extschema@.nickname_rule (VALUE));
 
 /*
 =================== UNSIGNED_BIGINT =================== 
@@ -642,7 +642,7 @@ CREATE DOMAIN UNSIGNED_INT AS INTEGER
 =================== URL =================== 
 */
 CREATE DOMAIN URL AS VARCHAR(255)
-    CHECK (@extschema@.url (VALUE));
+    CHECK (@extschema@.url_rule (VALUE));
 
 /*
 =================== VALIDATE =================== 

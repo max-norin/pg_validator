@@ -5,7 +5,7 @@ Docs where the regular expression comes from
 - [regular-expressions.info](https://www.regular-expressions.info/email.html)
 - [emailregex](https://emailregex.com/)
  */
-CREATE FUNCTION email ("value" ANYELEMENT)
+CREATE FUNCTION email_rule ("value" ANYELEMENT)
     RETURNS BOOLEAN
     AS $$
 BEGIN
