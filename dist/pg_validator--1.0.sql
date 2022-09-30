@@ -660,6 +660,7 @@ DECLARE
     "changed_columns" CONSTANT @extschema@.SET NOT NULL             = ARRAY (SELECT jsonb_object_keys("changed_record"));
     "relid" CONSTANT           OID NOT NULL                         = TG_RELID;
     "column"                   TEXT;
+    "generation_columns"       TEXT[];
     "constraint"    @extschema@.CONSTRAINT_DEF;
     "stack"                    TEXT;
     "res"                      BOOLEAN;
@@ -715,8 +716,20 @@ BEGIN
     INTO "constraints"
     FROM "table"
     WHERE ("table"."constraint")."columns" && "changed_columns";
+    -- get generation columns
+    "generation_columns" = ARRAY(
+        SELECT a.attname
+        FROM pg_attribute a
+        WHERE a.attrelid = "relid"
+          AND a.attnum > 0
+          AND NOT a.attisdropped
+          AND a.attgenerated != ''
+    );
     -- constraints group by "type"
     FOREACH "constraint" IN ARRAY COALESCE("constraints", ARRAY []::@extschema@.CONSTRAINT_DEF[]) LOOP
+        IF ("constraint".columns && "generation_columns") THEN
+            CONTINUE;
+        END IF;
         CASE "constraint"."type"
         WHEN 'f' THEN
             "f_constraints" = array_append("f_constraints", "constraint");
