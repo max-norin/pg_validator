@@ -7,7 +7,7 @@ DECLARE
     "f_constraints" @extschema@.CONSTRAINT_DEF[] NOT NULL           = '{}';
     "u_constraints" @extschema@.CONSTRAINT_DEF[] NOT NULL           = '{}';
     "record" CONSTANT          JSONB NOT NULL                       = to_jsonb(NEW);
-    "changed_record" CONSTANT  JSONB NOT NULL                       = "record" OPERATOR ( @extschema@.- ) to_jsonb (OLD);
+    "changed_record" CONSTANT  JSONB                                = "record" OPERATOR ( @extschema@.- ) to_jsonb (OLD);
     "changed_columns" CONSTANT @extschema@.SET NOT NULL             = ARRAY (SELECT jsonb_object_keys("changed_record"));
     "relid" CONSTANT           OID NOT NULL                         = TG_RELID;
     "column"                   TEXT;
