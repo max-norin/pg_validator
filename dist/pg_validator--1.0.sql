@@ -682,7 +682,7 @@ BEGIN
     -- if function was called due to presence of ON UPDATE in FOREIGN KEY clause, then do not checks
     GET DIAGNOSTICS "stack" = PG_CONTEXT;
     RAISE INFO USING MESSAGE = (concat('stack: ', "stack"));
-    IF "stack" !~* 'at (GET DIAGNOSTICS|SQL STATEMENT|EXECUTE)$' THEN
+    IF "stack" !~* 'at (GET DIAGNOSTICS|SQL STATEMENT|EXECUTE|ASSIGNMENT)$' THEN
         RETURN NEW;
     END IF;
     -- NOT NULL constraints
