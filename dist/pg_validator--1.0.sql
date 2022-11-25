@@ -696,7 +696,7 @@ BEGIN
                         AND (a.attnotnull OR (t.typtype = 'd'::"char" AND t.typnotnull))
             LOOP
                 IF ("changed_record" ? "column") AND (NOT @extschema@.require_rule ("changed_record" ->> "column")) THEN
-                    "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"validation.require"'::JSONB);
+                    "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"validations.require"'::JSONB);
                 END IF;
             END LOOP;
     -- get constraints PRIMARY KEY, UNIQUE, FOREIGN KEY and PARTIAL UNIQUE INDEX
@@ -758,7 +758,7 @@ BEGIN
             -- where "user_id" can repeat
             FOREACH "column" IN ARRAY @extschema@.array_unique ("constraint"."columns")
             LOOP
-                "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"validation.exists"'::JSONB);
+                "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"validations.exists"'::JSONB);
             END LOOP;
         END IF;
     END LOOP;
@@ -775,7 +775,7 @@ BEGIN
             "u_confirmed_constraints" = array_append("u_confirmed_constraints", "constraint");
         ELSEIF ("res" IS FALSE) THEN
             FOREACH "column" IN ARRAY "constraint"."columns" LOOP
-                "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"validation.unique"'::JSONB);
+                "v" = @extschema@.jsonb_array_append ("v", ARRAY["column"], '"validations.unique"'::JSONB);
             END LOOP;
         END IF;
     END LOOP;
